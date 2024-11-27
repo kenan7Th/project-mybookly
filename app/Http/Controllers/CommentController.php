@@ -120,7 +120,7 @@ class CommentController extends Controller
     // Ensure the authenticated user is the owner of the comment
     if ($comment->user_id !== Auth::id()) {
         return response()->json([
-            'message' => 'You are not authorized to delete this comment',
+            'message' => ' are not authorized to delete this comment',
         ], 403); 
     }
 
