@@ -7,28 +7,29 @@ use App\Http\Controllers\PostController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-// Uncomment this route if you want to return the authenticated user's information
-// Route::get('/user', function (Request $request) {
-//     return $request->user();
-// })->middleware('auth:sanctum');
+
+Route::get('/user', function (Request $request) {
+    return $request->user();
+})->middleware('auth:sanctum');
 
 Route::post('/userregister', [AuthController::class, 'userregister']);
 Route::post('/userlogin', [AuthController::class, 'userlogin']);
+Route::post('/userlogout', [AuthController::class, 'userlogout'])->middleware('auth:sanctum');
 
-// Corrected middleware group and missing semicolons
-Route::group(['middleware' => ['auth:sanctum']], function () {
-Route::get('/myuser',[AuthController::class ,'myuser' ]);
+// Route::middleware('auth:sanctum')->group(function () {
+    
+// });
 
-    Route::post('/userlogout', [AuthController::class, 'userlogout']);
+Route::post('/posts', [PostController::class, 'store'])->middleware('auth:sanctum');
+;
 
+//showingsinglePostForSingleUser
 
-});
-
-
+Route::get('/showingsinglePostForSingleUser',[PostController::class, 'showingsinglePostForSingleUser'])->middleware('auth:sanctum');
 
 //post routes
 Route::get('/posts',[PostController::class, 'index']);
-Route::post('/posts',[PostController::class, 'store']);//create port 
+//Route::post('/posts',[PostController::class, 'store']);//create port 
 Route::get('/posts/{id}',[PostController::class, 'show']);//get single post 
 Route::put('/posts/{id}',[PostController::class, 'update']);//update single post 
 Route::delete('/posts/{id}',[PostController::class, 'destroy']);//delete post

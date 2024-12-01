@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('words', function (Blueprint $table) {
             $table->id();
-        $table->foreignId('sentence_id')->constrained()->cascadeOnDelete(); // links to sentence
+        $table->foreignId('sentence_id')->constrained('sentences')->cascadeOnDelete(); // links to sentence
         $table->string('word');
         $table->timestamps();
         });

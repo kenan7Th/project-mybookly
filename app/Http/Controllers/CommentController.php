@@ -33,7 +33,7 @@ class CommentController extends Controller
     {
         // Validate the request
         $validated = $request->validate([
-            'content' => 'required|string|max:1000',
+            'comment' => 'required|string',
         ]);
 
         // Find the post by ID
@@ -49,7 +49,7 @@ class CommentController extends Controller
         // Create the comment for the post and associate it with the authenticated user
         $comment = $post->comments()->create([
             'user_id' => Auth::id(),  // Assuming you're using the MYUser model for authentication
-            'content' => $validated['content'],
+            'comment' => $validated['content'],
         ]);
 
         return response()->json([

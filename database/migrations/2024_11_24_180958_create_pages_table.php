@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('pages', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('chapter_id')->constrained()->cascadeOnDelete(); // links to chapter
+            $table->foreignId('chapter_id')->constrained('chapters')->cascadeOnDelete(); // links to chapter
             $table->integer('page_number');
             $table->timestamps();
         });

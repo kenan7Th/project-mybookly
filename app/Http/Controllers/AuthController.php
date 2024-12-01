@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\MYUser; // Use the correct namespace for your user model
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
@@ -15,12 +16,12 @@ class AuthController extends Controller
         // Validate the fields
         $attributes = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:my_users,email', // Ensure the table name matches your DB
+            'email' => 'required|email|unique:users,email', // Ensure the table name matches your DB
             'password' => 'required|string|min:8',
         ]);
 
         // Create the user
-        $myuser = MYUser::create([
+        $myuser = User::create([
             'name' => $attributes['name'],
             'email' => $attributes['email'],
             'password' => Hash::make($attributes['password']), // Hash the password for security
@@ -30,35 +31,33 @@ class AuthController extends Controller
         return response()->json([
             'myuser' => $myuser,
             'token' => $myuser->createToken('auth_token')->plainTextToken, // Ensure Sanctum is set up
+            'auth id'=> $myuser->id 
         ], 201); // 201 for created resource
     }
 
     // User login
     public function userlogin(Request $request)
-    {
-        // Validate the fields
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|string|min:8',
-        ]);
+{
+    // Validate the fields
+    $credentials = $request->validate([
+        'email' => 'required|email',
+        'password' => 'required|string',
+    ]);
 
-        // Attempt to authenticate
-        if (!Auth::attempt(['email' => $credentials['email'], 'password' => $credentials['password']])) {
-            return response()->json([
-                'message' => 'Invalid credentials',
-            ], 401); // 401 for unauthorized
-        }
-
-        // Retrieve the authenticated user
-        $myuser = MYUser::where('email', $credentials['email'])->firstOrFail();
-
-        // Return response with user and token
+    // Check if the user exists and the password matches
+    $myuser = User::where('email', $credentials['email'])->first();
+    if (!$myuser || !Hash::check($credentials['password'], $myuser->password)) {
         return response()->json([
-            'myuser' => $myuser,
-            'token' => $myuser->createToken('auth_token')->plainTextToken, // Ensure Sanctum is set up
-        ], 200); // 200 for success
+            'message' => 'Invalid credentials',
+        ], 401); // 401 for unauthorized
     }
 
+    // Return response with user and token
+    return response()->json([
+        'user' => $myuser,
+        'token' => $myuser->createToken('auth_token')->plainTextToken,
+    ], 200); // 200 for success
+}
     // User logout
     public function userlogout(Request $request)
     {

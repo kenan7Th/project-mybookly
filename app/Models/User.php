@@ -6,43 +6,118 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-
+use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
+    use Notifiable,HasApiTokens;
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
+    // Specify the table name
+    protected $table = 'users';
+   /**
+    * The attributes that are mass assignable.
+    *
+    * @var array
+    */
+   protected $fillable = [
+       'name',
+       'image',
+       'email',
+       'password',
+       'age',
+       
+       'level',
+       'golden_letter_wins',
+   ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
+   /**
+    * The attributes that should be hidden for arrays.
+    *
+    * @var array
+    */
+   protected $hidden = [
+       'password',
+       'remember_token',
+   ];
+
+   /**
+    * The attributes that should be cast to native types.
+    *
+    * @var array
+    */
+   protected $casts = [
+      // 'email_verified_at' => 'datetime',
+   ];
+
+   public function reader()
+   {
+       return $this->hasOne(Reader::class);
+   }
+
+   public function writer()
+   {
+       return $this->hasOne(Writer::class);
+   }
+
+   public function poster()
+   {
+       return $this->hasOne(Posterr::class);
+   }
+
+   public function books()
+   {
+       return $this->hasMany(Book::class);
+   }
+   public function achievements()
+   {
+       return $this->hasMany(Achievement::class);
+   }
+
+   public function discounts()
+   {
+       return $this->hasManyThrough(Discount::class, Achievement::class);
+   }
+
+ 
+
+   // Users can have many friends
+   public function friends()
+   {
+       return $this->hasMany(Friend::class, 'user_id');
+   }
+
+   // Users can receive messages
+   public function receivedMessages()
+   {
+       return $this->hasMany(Message::class, 'receiver_id');
+   }
+
+   // Users can send messages
+   public function sentMessages()
+   {
+       return $this->hasMany(Message::class, 'sender_id');
+   }
+
+   // Users can be friends with many other users
+   public function friendsList()
+   {
+       return $this->belongsToMany(User::class, 'friends', 'user_id', 'friend_id')
+           ->withPivot('status')
+           ->withTimestamps();
+   }
+
+       /**
+    * Get the reviews written by this user.
+    */
+   public function reviews()
+   {
+       return $this->hasMany(Review::class);
+   }
+
+   public function posts()
+   {
+       return $this->hasMany(Post::class);
+   }
 }

@@ -1,0 +1,10 @@
+
+//user register
+http://127.0.0.1:8000/api/userregister?name=samera&email=samera@gamil.com&password=kenanbasketball&age=60
+
+
+//myuser
+http://127.0.0.1:8000/api/myuser  ...put the header token inside the auth
+
+//logout
+http://127.0.0.1:8000/api/userlogout

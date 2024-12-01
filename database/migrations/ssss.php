@@ -21,6 +21,7 @@ return new class extends Migration
             $table->timestamp('expires_at')->nullable();
             $table->timestamps();
         });
+        //2024_11_26_080018_create_personal_access_tokens_table
     }
 
     /**

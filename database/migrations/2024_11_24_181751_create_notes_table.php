@@ -13,7 +13,13 @@ return new class extends Migration
     {
         Schema::create('notes', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete(); // links to page
+
+            
+            $table->foreignId('book_id')->constrained('books')->cascadeOnDelete(); // links to page
+
             $table->timestamps();
+
         });
     }
 

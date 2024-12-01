@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('posterrs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('my_users')->cascadeOnDelete(); // Connect to 'my_users' table
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete(); // Connect to 'my_users' table
             $table->string('title');
             $table->text('description');
         });

@@ -3,25 +3,39 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\MYUser;
 use App\Models\Post;
-use Illuminate\Support\Facades\Auth; // For handling authenticated user
+use Illuminate\Support\Facades\Auth;
+
 
 class PostController extends Controller
 {
+    // Enforce authentication for all methods in this controller
+  
+//dispay a single post for a single user
+public function showingsinglePostForSingleUser()
+
+{
+    $posts = Auth::user()->posts;
+    return response()->json([
+        'posts' => $posts,
+    ], 200); 
+}
+
+
+
     // Display all posts with user details, comment count, and like count
     public function index()
     {
         $posts = Post::orderby('created_at', 'desc')
                     ->withCount('comments', 'likes') // Counting comments and likes
-                    ->with(['user' => function($query) {
+                    ->with(['user' => function ($query) {
                         $query->select('id', 'name', 'image'); // Fetch user details
                     }])
                     ->get();
 
         return response()->json([
             'posts' => $posts,
-        ], 200);
+        ], 200); // Return posts with a 200 status
     }
 
     // Get a single post with comments and likes count
@@ -29,7 +43,7 @@ class PostController extends Controller
     {
         $post = Post::where('id', $id)
                     ->withCount('comments', 'likes') // Count comments and likes
-                    ->with(['user' => function($query) {
+                    ->with(['user' => function ($query) {
                         $query->select('id', 'name', 'image'); // Fetch user details
                     }])
                     ->first();
@@ -48,25 +62,27 @@ class PostController extends Controller
     // Store a new post
     public function store(Request $request)
     {
-        // Validate the request data
+        //Validate the input
+        
+
+        // // Create a new post
+        // $post = Post::create([
+        //     'body' => $validated['body'],
+        //     'user_id' => auth()->id(), // Assuming the user is authenticated
+        // ]);
+        $user_id = Auth::user()->id;
         $validated = $request->validate([
-            'body' => 'required|string|max:255',
-            
+            'body' => 'required|string|max:255', // Body is required, must be a string, and up to 255 characters
+            'image' => 'nullable|string', // Image is optional, must be a string if provided
         ]);
-
-        // Create a new post for the authenticated user
+       
+        // // Create a new post
         $post = Post::create([
-            'body' => $validated['body'],
-         
-            'user_id' => Auth::id(), // Store the authenticated user's ID
+            'body' => $validated['body'], 
+            'user_id'=> $user_id// Assuming the user is authenticated
         ]);
-
-        return response()->json([
-            'message' => 'Post created successfully',
-            'post' => $post,
-        ], 201); // 201 for resource created
+        return response()->json( $post, 201);
     }
-
 
     // Update an existing post
     public function update(Request $request, $id)
@@ -90,12 +106,11 @@ class PostController extends Controller
 
         // Validate the request data
         $validated = $request->validate([
-            'body' => 'required|string ',
-            ]);
+            'body' => 'required|string',
+        ]);
 
         // Update the post with validated data
         $post->body = $validated['body'];
-      
         $post->save();
 
         return response()->json([
@@ -103,32 +118,32 @@ class PostController extends Controller
             'post' => $post,
         ], 200); // 200 for success
     }
-// Delete a post by ID
-public function destroy($id)
-{
-    // Find the post by ID
-    $post = Post::find($id);
 
-    // If the post doesn't exist, return a 404 error
-    if (!$post) {
+    // Delete a post by ID
+    public function destroy($id)
+    {
+        // Find the post by ID
+        $post = Post::find($id);
+
+        // If the post doesn't exist, return a 404 error
+        if (!$post) {
+            return response()->json([
+                'message' => 'Post not found',
+            ], 404);
+        }
+
+        // Ensure the authenticated user is the owner of the post
+        if ($post->user_id !== Auth::id()) {
+            return response()->json([
+                'message' => 'You are not authorized to delete this post',
+            ], 403); // Forbidden
+        }
+
+        // Delete the post
+        $post->delete();
+
         return response()->json([
-            'message' => 'Post not found',
-        ], 404);
+            'message' => 'Post deleted successfully',
+        ], 200); // 200 for success
     }
-
-    // Ensure the authenticated user is the owner of the post
-    if ($post->user_id !== Auth::id()) {
-        return response()->json([
-            'message' => 'You are not authorized to delete this post',
-        ], 403); // Forbidden
-    }
-
-    // Delete the post
-    $post->delete();
-
-    return response()->json([
-        'message' => 'Post deleted successfully',
-    ], 200); // 200 for success
-}
-
 }

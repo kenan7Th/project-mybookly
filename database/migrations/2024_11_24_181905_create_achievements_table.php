@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('achievements', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('user_id')->constrained('my_users')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->string('achievement_type'); // e.g., "Pages Read"
             $table->integer('goal'); // e.g., "100 pages"
             $table->integer('progress'); // e.g., "50 pages read"
